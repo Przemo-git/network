@@ -1,0 +1,85 @@
+{% extends 'network/layout.html' %}
+
+{% block body %}
+
+<div class="container">
+    <div class="jumbotron">
+        <h2>{{ user }}</h2>
+        <br>
+        {% if user != request.user.get_username %}
+        <button class="btn btn-outline-success btn-md follow" data-user="{{ user }}" data-current="{{ request.user.get_username }}"><i class="fa fa-user-plus fa-lg"></i>Follow</button>
+        <button class="btn btn-outline-warning btn-md unfollow" data-user="{{ user }}" data-current="{{ request.user.get_username }}"><i class="fa fa-user-times fa-lg"></i>Unfollow</button>
+        {% endif %}
+        <hr>
+        <hr>
+        <hr>
+        <h5>Follower(s): <span id="followCount">{{ followed_by }}</span></h5>
+        <h5>Following: <span id="followingCount">{{ follow }}</span> </h5>
+    </div>
+</div>
+<div class="display">
+        {% for post in posts%}
+            <div class="post">
+                <p class="float-right">{{post.time}}</p>
+                <h4><a href="{% url 'profile' post.user  %}" class="badge badge-pill badge-primary">{{post.user}}</a></h4>
+                <div>
+                    <p class="card-text"> {{post.content}}</p>
+                    <!--<p><h5 class="likes">{{post.likes}}</h5></p> -->
+                    <span style="height: 100px;"><i class='fa fa-thumbs-up fa-lg'></i></span>
+                    <input type="button" data-post="{{post.id}}" data-user="{{request.user.get_username}}" class="btn btn-outline-primary btn-md like_btn" style="width: 100px;" value="{{post.likes}}">
+                    {% if post.user == request.user.get_username %}
+                        <button type="button" class="btn btn-outline-danger btn-md" style="width: 100px;"><a href="{% url 'edit' post.id  %}">Edit</a></button>
+                    {%endif%}
+                </div>
+            </div>
+        {%endfor%}
+    </div>
+
+<div class="pagination justify-content-center">
+    <div class="step-links">
+        {% if posts.has_previous %}
+        <button type="button" class="btn btn-outline-info"><a href="?page=1">&laquo;First</a></button>
+        <button type="button" class="btn btn-outline-info"><a href="?page={{ posts.previous_page_number }}">Previous</a></button>
+        {% endif %}
+
+        {% if posts.has_next %}
+        <button type="button" class="btn btn-outline-info"><a href="?page={{ posts.next_page_number }}">Next</a></button>
+        <button type="button" class="btn btn-outline-info"><a href="?page={{ posts.paginator.num_pages }}">Last&raquo;</a></button>
+        {% endif %}
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded',()=>{
+        document.querySelector('.follow').addEventListener('click',function (){
+            const raw = document.querySelector('.follow').dataset
+            const user = raw.user
+            console.log(user)
+            const currentuser = raw.current
+            console.log(currentuser)
+            fetch('follow/'+user+'/'+currentuser).then(response=>response.text()).then(text=>{
+                document.querySelector('#followCount').innerHTML = text
+            })
+        })
+    })
+    document.querySelectorAll('.like_btn').forEach(button=>{
+            button.onclick = function (){
+                const id = this.dataset.post
+                const user = this.dataset.user
+                fetch('like/'+id+'/'+user).then(response=>response.text()).then(text=>{
+                    this.value = text
+                })
+            }
+        })
+     document.querySelector('.unfollow').addEventListener('click',function (){
+            const raw = document.querySelector('.follow').dataset
+            const user = raw.user
+            console.log(user)
+            const currentuser = raw.current
+            console.log(currentuser)
+            fetch('unfollow/'+user+'/'+currentuser).then(response=>response.text()).then(text=>{
+                document.querySelector('#followCount').innerHTML = text
+            })
+    })
+
+</script>
+{% endblock %}

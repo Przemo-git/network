@@ -1,0 +1,60 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+
+<div class="container">
+    <div class="make-post">
+
+        <form>
+            <h4>Update Post</h4>
+            <div class="form-group">
+                <textarea id="textContent" autofocus class="form-control content" name="content" rows="10" placeholder="Type your Post" maxlength="319">{{content}}</textarea>
+            </div>
+            <p class="text-muted"><span class="charCount">0</span>/320</p>
+            <input class="btn btn-primary" id="update" type="submit" data-id="{{id}}" value="Update">
+        </form>
+
+    </div>
+</div>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+        console.log("DOM Loaded")
+        var lenCount = document.querySelector("#textContent").value.length;
+
+        //save updated post
+        document.querySelector("#update").addEventListener("click", function(){
+            const id = document.querySelector("#update").dataset.id
+            const content = document.querySelector("#textContent").value
+            fetch("update/"+id+"/"+content)
+            .then(response => response.text())
+            .then(text => {
+                alert(text)
+            })
+        })
+
+        document.querySelector(".content").addEventListener("keydown", (event)=>{
+            const key = event.key;
+            if (key === "Backspace" || key === "Delete") {
+                if (lenCount > 0){
+                    lenCount -= 1
+                }
+            }
+            else{
+                if (event.keyCode >= 48 && event.keyCode <= 57){
+                    lenCount += 1
+                }
+                if (event.keyCode >= 65 && event.keyCode <= 120){
+                    lenCount += 1
+                }
+            }
+            document.querySelector(".charCount").innerHTML = lenCount
+        })
+
+
+    })
+
+</script>
+
+{% endblock %}
